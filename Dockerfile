@@ -54,4 +54,12 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
     cd cdr_schemas && \
     pip install -e .
 
+# To install conda
+# curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+# bash Miniforge3-$(uname)-$(uname -m).sh -b
+
+# source /root/miniforge3/bin/activate
+# Create new environment
+# Install packages 
+
 ENTRYPOINT ["/bin/bash", "/usr/local/project/startup.sh"]
