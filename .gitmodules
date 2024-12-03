@@ -1,0 +1,3 @@
+[submodule "mtri-statmagic-web"]
+	path = mtri-statmagic-web
+	url = https://github.com/DARPA-CRITICALMAAS/mtri-statmagic-web.git
