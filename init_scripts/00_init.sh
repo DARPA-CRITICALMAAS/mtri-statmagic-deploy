@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# READ FROM ENV VAR FOR PORT NUMBERS!
+psql -U $POSTGRES_USER -d postgres -p 5432 -c "CREATE ROLE django_user_statmagic LOGIN PASSWORD '$PG_DJANGO_USER_PASS'  NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;"
+psql -U $POSTGRES_USER -d postgres -p 5432 -c "GRANT ALL ON DATABASE statmagic TO django_user_statmagic;"

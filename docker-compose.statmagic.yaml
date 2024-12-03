@@ -1,0 +1,70 @@
+
+services:
+  postgis:
+#    profiles:
+#      - postgis
+    image: postgis/postgis:14-3.5
+    # command: -c config_file=/etc/postgresql.conf
+    hostname: $DB_HOSTNAME
+    user: postgres
+    environment:
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASS
+      POSTGRES_DB: statmagic
+      PG_DJANGO_USER_PASS: $PG_DJANGO_USER_PASS
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+      # - ./postgresql.conf:/etc/postgresql.conf
+      - ${PWD}/statmagic_dump.dump.out:/tmp/statmagic_dump.dump.out
+      - ${PWD}/init_scripts:/docker-entrypoint-initdb.d/
+
+    # configs:
+    #   - source: init_db
+    #     target: /docker-entrypoint-initdb.d/init.sql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "statmagic"]
+      interval: "3s"
+      timeout: "3s"
+      retries: 30
+    # networks:
+    #   - statmagic_network
+
+#  postgis-migrate:
+##    profiles:
+##      - postgis
+#    image: migrate/migrate:v4.17.0
+#    depends_on:
+#      postgis:
+#        condition: service_healthy
+
+  web-app:
+    build:
+      args:
+        DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
+    command: server
+#    command: python manage.py runserver 0:${PORT}
+#    volumes:
+#      - .:/usr/local/project/mtri-statmagic-web
+    volumes:
+#      - ./mtri-statmagic-web:/usr/local/project/mtri-statmagic-web
+      - ./statmagic_apache_for_000-default.conf:/etc/apache2/sites-available/000-default.conf
+      - ./startup.sh:/usr/local/project/startup.sh
+    ports:
+      - 8000:80
+#      - ${PORT}:${PORT}
+    environment:
+      CDR_API_TOKEN: $CDR_API_TOKEN
+      DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
+      PORT: $PORT
+      DATABASE_HOST: $DATABASE_HOST
+      DATABASE_PORT: $DATABASE_PORT
+    depends_on:
+      - postgis
+
+# configs:
+#   init_db:
+#     file: ./init.sql
+
+volumes:
+  postgis_data:
