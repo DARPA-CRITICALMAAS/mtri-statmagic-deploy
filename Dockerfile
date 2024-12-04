@@ -9,7 +9,7 @@ ENV WEBSITE_NAME=${WEBSITE_NAME}
 ARG DJANGO_USER_STATMAGIC_PGPASS
 
 # Create statmagic user
-RUN useradd -s /bin/bash statmagic
+RUN useradd -m -s /bin/bash statmagic
 RUN echo "statmagic:${DJANGO_USER_STATMAGIC_PGPASS}" | chpasswd
 
 # Add apache2, mod_wsgi, python3.6 libraries
@@ -53,13 +53,5 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
     git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
     cd cdr_schemas && \
     pip install -e .
-
-# To install conda
-# curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
-# bash Miniforge3-$(uname)-$(uname -m).sh -b
-
-# source /root/miniforge3/bin/activate
-# Create new environment
-# Install packages 
 
 ENTRYPOINT ["/bin/bash", "/usr/local/project/startup.sh"]

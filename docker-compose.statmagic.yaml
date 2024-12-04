@@ -43,22 +43,18 @@ services:
       args:
         DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
     command: server
-#    command: python manage.py runserver 0:${PORT}
-#    volumes:
-#      - .:/usr/local/project/mtri-statmagic-web
     volumes:
-#      - ./mtri-statmagic-web:/usr/local/project/mtri-statmagic-web
-      - ./statmagic_apache_for_000-default.conf:/etc/apache2/sites-available/000-default.conf
+      - ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf
       - ./startup.sh:/usr/local/project/startup.sh
     ports:
       - 8000:80
-#      - ${PORT}:${PORT}
     environment:
       CDR_API_TOKEN: $CDR_API_TOKEN
       DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
       PORT: $PORT
       DATABASE_HOST: $DATABASE_HOST
       DATABASE_PORT: $DATABASE_PORT
+      SECRET_KEY: $SECRET_KEY
     depends_on:
       - postgis
 
