@@ -68,6 +68,14 @@ RUN . /root/miniforge3/bin/activate && \
     conda activate statmagic-env && \
     pip install --upgrade pip wheel && \
     pip install PyGreSQL
+
+RUN . /root/miniforge3/bin/activate && \
+    conda activate statmagic-env && \
+    cd ${BASE_DIR} && \
+    git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
+    cd cdr_schemas && \
+    pip install -e .
+
 # To install conda
 # curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 # bash Miniforge3-$(uname)-$(uname -m).sh -b
