@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y apache2 \
     gdal-bin \
     libgdal-dev \
     git \
+    curl \
     && apt-get clean \
     && apt-get autoremove \
     && rm -rf /var/lib/apt/lists/*
@@ -44,22 +45,35 @@ COPY $WEBSITE_NAME ${BASE_DIR}/${WEBSITE_NAME}
 RUN mkdir -p /usr/local/pythonenv
 RUN sudo pip3 install virtualenv
 RUN virtualenv /usr/local/pythonenv/mtri-statmagic-web-env
-RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
-    cd ${BASE_DIR}/${WEBSITE_NAME} && \
-    pip install --upgrade pip wheel && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}') && \
-    cd ../ && \
-    git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
-    cd cdr_schemas && \
-    pip install -e .
+#RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
+#    cd ${BASE_DIR}/${WEBSITE_NAME} && \
+#    pip install --upgrade pip wheel && \
+#    pip install --no-cache-dir -r requirements.txt && \
+#    pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}') && \
+#    cd ../ && \
+#    git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
+#    cd cdr_schemas && \
+#    pip install -e .
 
+# NOTE: Make sure requirements.txt has no version numbers
+COPY mtri-statmagic-web/requirements.txt .
+RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" && \
+    bash Miniforge3-$(uname)-$(uname -m).sh -b && \
+    . /root/miniforge3/bin/activate && \
+    conda create -n "statmagic-env" && \
+    conda activate statmagic-env && \
+    conda install --yes --file requirements.txt
+
+RUN . /root/miniforge3/bin/activate && \
+    conda activate statmagic-env && \
+    pip install --upgrade pip wheel && \
+    pip install PyGreSQL
 # To install conda
 # curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 # bash Miniforge3-$(uname)-$(uname -m).sh -b
 
 # source /root/miniforge3/bin/activate
 # Create new environment
-# Install packages 
+# Install packages
 
 ENTRYPOINT ["/bin/bash", "/usr/local/project/startup.sh"]
