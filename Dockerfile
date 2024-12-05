@@ -9,8 +9,9 @@ ENV WEBSITE_NAME=${WEBSITE_NAME}
 ARG DJANGO_USER_STATMAGIC_PGPASS
 
 # Create statmagic user
-RUN useradd -s /bin/bash statmagic
+RUN useradd -m -s /bin/bash statmagic
 RUN echo "statmagic:${DJANGO_USER_STATMAGIC_PGPASS}" | chpasswd
+RUN chmod 755 /home/statmagic
 
 # Add apache2, mod_wsgi, python3.6 libraries
 RUN apt-get update && apt-get install -y apache2 \
@@ -30,6 +31,7 @@ RUN apt-get update && apt-get install -y apache2 \
     libgdal-dev \
     git \
     curl \
+    libgeos-dev \
     && apt-get clean \
     && apt-get autoremove \
     && rm -rf /var/lib/apt/lists/*
@@ -58,20 +60,16 @@ RUN virtualenv /usr/local/pythonenv/mtri-statmagic-web-env
 # NOTE: Make sure requirements.txt has no version numbers
 COPY mtri-statmagic-web/requirements.txt .
 RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" && \
-    bash Miniforge3-$(uname)-$(uname -m).sh -b && \
-    . /root/miniforge3/bin/activate && \
-    conda create -n "statmagic-env" && \
+    bash Miniforge3-$(uname)-$(uname -m).sh -b -p /opt/miniforge3 && \
+    . /opt/miniforge3/bin/activate && \
+    conda create -n "statmagic-env" python=3.10 && \
     conda activate statmagic-env && \
-    conda install --yes --file requirements.txt
-
-RUN . /root/miniforge3/bin/activate && \
-    conda activate statmagic-env && \
+    conda install --yes --file requirements.txt && \
     pip install --upgrade pip wheel && \
     pip install PyGreSQL
 
-RUN . /root/miniforge3/bin/activate && \
-    conda activate statmagic-env && \
-    cd ${BASE_DIR} && \
+RUN cd ${BASE_DIR} && \
+    . /opt/miniforge3/bin/activate statmagic-env && \
     git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
     cd cdr_schemas && \
     pip install -e .

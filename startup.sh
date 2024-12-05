@@ -10,29 +10,17 @@ case $1 in
       BASE_PATH=/usr/local/project/${WEBSITE_BASE_NAME}
       ENV_PATH=/usr/local/pythonenv/${WEBSITE_BASE_NAME}-env
 
-#      # Check if requirements.txt exists, and there is no env already built
-#      if [ -e $BASE_PATH/requirements.txt ] && [ ! -d $BASE_PATH/env ]; then
-#          sudo pip3 install virtualenv
-#          cd $BASE_PATH
-#          mkdir /usr/local/pythonenv
-#          virtualenv $ENV_PATH
-#          source $ENV_PATH/bin/activate
-#
-#          # Install Python dependencies
-#          pip install --upgrade pip wheel
-#          pip install --no-cache-dir -r requirements.txt
-#
-#          # Install GDAL separate (because nothing with GDAL is easy...)
-#          pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}')
-#
-#          # Clone and install DARPA cdr_schemas repository
-#          git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git
-#          cd cdr_schemas
-#          pip install -e .
-#      else
-#          source $ENV_PATH/bin/activate
-#      fi
-      source $ENV_PATH/bin/activate
+      # Check if required vars exist in /etc/apache2/envvars
+      if ! grep -q "CDR_API_TOKEN" /etc/apache2/envvars; then
+        echo "export CDR_API_TOKEN=$CDR_API_TOKEN" >> /etc/apache2/envvars
+        echo "export DJANGO_USER_STATMAGIC_PGPASS=$DJANGO_USER_STATMAGIC_PGPASS" >> /etc/apache2/envvars
+        echo "export SECRET_KEY=$SECRET_KEY" >> /etc/apache2/envvars
+        echo "export CDR_SCHEMAS_DIRECTORY=/usr/local/project/cdr_schemas" >> /etc/apache2/envvars
+      fi
+
+      # source $ENV_PATH/bin/activate
+      . /opt/miniforge3/bin/activate statmagic-env
+
       # Change to $BASE_PATH
       cd $BASE_PATH
       # Make django migrations
