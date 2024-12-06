@@ -62,7 +62,8 @@ services:
       MAPSERVER_SERVER: $MAPSERVER_SERVER
       TILESERVER_LOCAL_SYNC_FOLDER: $TILESERVER_LOCAL_SYNC_FOLDER
     depends_on:
-      - postgis
+      postgis:
+        condition: service_healthy
 
   cdr-sync:
     build:
