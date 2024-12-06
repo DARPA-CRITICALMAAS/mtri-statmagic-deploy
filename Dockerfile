@@ -67,10 +67,9 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
 #    conda activate statmagic-env && \
 #    conda install --yes --file requirements.txt && \
 #    pip install --upgrade pip wheel && \
-#    pip install PyGreSQL
-
-#RUN cd ${BASE_DIR} && \
-#    . /opt/miniforge3/bin/activate statmagic-env && \
+#    pip install --no-cache-dir -r requirements.txt && \
+#    pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}') && \
+#    cd ../ && \
 #    git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
 #    cd cdr_schemas && \
 #    pip install -e .
@@ -79,6 +78,6 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
 #RUN echo "*/1 * * * * export SECRET_KEY=secret;export CDR_API_TOKEN=${CDR_API_TOKEN};python /usr/local/project/mtri-statmagic-web-dev/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log" > /etc/cron.d/sync_cdr
 #RUN chmod 0644 /etc/cron.d/sync_cdr
 RUN mkdir -p /var/log/statmagic
-RUN echo "*/1 * * * * export SECRET_KEY=secret;export CDR_API_TOKEN=${CDR_API_TOKEN};/usr/local/pythonenv/mtri-statmagic-web-env/bin/python /usr/local/project/mtri-statmagic-web/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py &> /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log" | crontab
+RUN echo "*/1 * * * * export SECRET_KEY=secret;export CDR_API_TOKEN=${CDR_API_TOKEN};python /usr/local/project/mtri-statmagic-web/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log" | crontab
 
 ENTRYPOINT ["/bin/bash", "/usr/local/project/startup.sh"]

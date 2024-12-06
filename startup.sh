@@ -22,8 +22,8 @@ case $1 in
         echo "export TILESERVER_LOCAL_SYNC_FOLDER=$TILESERVER_LOCAL_SYNC_FOLDER" >> /etc/apache2/envvars
       fi
 
-      source $ENV_PATH/bin/activate
-      # . /opt/miniforge3/bin/activate statmagic-env
+#      source $ENV_PATH/bin/activate
+       . /opt/miniforge3/bin/activate statmagic-env
 
       # Change to $BASE_PATH
       cd $BASE_PATH
