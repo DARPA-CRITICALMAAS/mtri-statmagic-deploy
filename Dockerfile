@@ -1,16 +1,16 @@
 FROM ubuntu:22.04
 
-MAINTAINER hbeadles
-
 ARG BASE_DIR=/usr/local/project
 ARG WEBSITE_NAME=mtri-statmagic-web
 ENV WEBSITE_NAME=${WEBSITE_NAME}
 
 ARG DJANGO_USER_STATMAGIC_PGPASS
+ARG CDR_API_TOKEN
 
 # Create statmagic user
 RUN useradd -m -s /bin/bash statmagic
 RUN echo "statmagic:${DJANGO_USER_STATMAGIC_PGPASS}" | chpasswd
+RUN chmod 755 /home/statmagic
 
 # Add apache2, mod_wsgi, python3.6 libraries
 RUN apt-get update && apt-get install -y apache2 \
@@ -29,6 +29,9 @@ RUN apt-get update && apt-get install -y apache2 \
     gdal-bin \
     libgdal-dev \
     git \
+    curl \
+    libgeos-dev \
+    cron \
     && apt-get clean \
     && apt-get autoremove \
     && rm -rf /var/lib/apt/lists/*
@@ -53,5 +56,28 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
     git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
     cd cdr_schemas && \
     pip install -e .
+
+# NOTE: Make sure requirements.txt has no version numbers
+#COPY mtri-statmagic-web/requirements.txt .
+#RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" && \
+#    bash Miniforge3-$(uname)-$(uname -m).sh -b -p /opt/miniforge3 && \
+#    . /opt/miniforge3/bin/activate && \
+#    conda create -n "statmagic-env" python=3.10 && \
+#    conda activate statmagic-env && \
+#    conda install --yes --file requirements.txt && \
+#    pip install --upgrade pip wheel && \
+#    pip install PyGreSQL
+
+#RUN cd ${BASE_DIR} && \
+#    . /opt/miniforge3/bin/activate statmagic-env && \
+#    git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
+#    cd cdr_schemas && \
+#    pip install -e .
+
+# Set up CRON job to sync data layers from CDR
+#RUN echo "*/1 * * * * export SECRET_KEY=secret;export CDR_API_TOKEN=${CDR_API_TOKEN};python /usr/local/project/mtri-statmagic-web-dev/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log" > /etc/cron.d/sync_cdr
+#RUN chmod 0644 /etc/cron.d/sync_cdr
+RUN mkdir -p /var/log/statmagic
+RUN echo "*/1 * * * * export SECRET_KEY=secret;export CDR_API_TOKEN=${CDR_API_TOKEN};python /usr/local/project/mtri-statmagic-web/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log" | crontab
 
 ENTRYPOINT ["/bin/bash", "/usr/local/project/startup.sh"]

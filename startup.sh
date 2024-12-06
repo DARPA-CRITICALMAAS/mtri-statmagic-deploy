@@ -16,9 +16,15 @@ case $1 in
         echo "export DJANGO_USER_STATMAGIC_PGPASS=$DJANGO_USER_STATMAGIC_PGPASS" >> /etc/apache2/envvars
         echo "export SECRET_KEY=$SECRET_KEY" >> /etc/apache2/envvars
         echo "export CDR_SCHEMAS_DIRECTORY=/usr/local/project/cdr_schemas" >> /etc/apache2/envvars
+        echo "export DB_HOST=$DB_HOST" >> /etc/apache2/envvars
+        echo "export DB_PORT=$DB_PORT" >> /etc/apache2/envvars
+        echo "export MAPSERVER_SERVER=$MAPSERVER_SERVER" >> /etc/apache2/envvars
+        echo "export TILESERVER_LOCAL_SYNC_FOLDER=$TILESERVER_LOCAL_SYNC_FOLDER" >> /etc/apache2/envvars
       fi
 
       source $ENV_PATH/bin/activate
+      # . /opt/miniforge3/bin/activate statmagic-env
+
       # Change to $BASE_PATH
       cd $BASE_PATH
       # Make django migrations
