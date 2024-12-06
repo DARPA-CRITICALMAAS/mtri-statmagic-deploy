@@ -4,17 +4,14 @@ services:
 #    profiles:
 #      - postgis
     image: postgis/postgis:14-3.5
-    # command: -c config_file=/etc/postgresql.conf
-#    hostname: $DB_HOSTNAME
     user: postgres
     environment:
-      POSTGRES_USER: $DB_USER
-      POSTGRES_PASSWORD: $DB_PASS
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: statmagic
-      PG_DJANGO_USER_PASS: $PG_DJANGO_USER_PASS
+      DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
     volumes:
       - postgis_data:/var/lib/postgresql/data
-      # - ./postgresql.conf:/etc/postgresql.conf
       - ${PWD}/statmagic_dump.dump.out:/tmp/statmagic_dump.dump.out
       - ${PWD}/init_scripts:/docker-entrypoint-initdb.d/
 
@@ -27,8 +24,6 @@ services:
       interval: "3s"
       timeout: "3s"
       retries: 30
-    # networks:
-    #   - statmagic_network
 
 #  postgis-migrate:
 ##    profiles:
@@ -55,7 +50,6 @@ services:
     environment:
       CDR_API_TOKEN: $CDR_API_TOKEN
       DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
-#      PORT: $PORT
       DB_HOST: $DB_HOST
       DB_PORT: $DB_PORT
       SECRET_KEY: $SECRET_KEY
