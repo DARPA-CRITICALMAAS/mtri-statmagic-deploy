@@ -52,7 +52,7 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
     pip install --upgrade pip wheel && \
     pip install --no-cache-dir -r requirements.txt && \
 #    pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}') && \
-    pip install GDAL==3.4.0 && \
+#    pip install GDAL==3.4.0 && \
     cd ../ && \
     git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
     cd cdr_schemas && \

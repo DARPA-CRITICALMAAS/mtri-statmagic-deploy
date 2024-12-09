@@ -9,7 +9,7 @@ git clone https://github.com/DARPA-CRITICALMAAS/mtri-statmagic-deploy.git
 ```bash
 cd mtri-statmagic-web
 git submodule init
-git submodule fetch
+git submodule update
 ```
 
 ## If you have not done so, set up AWS CLI
@@ -50,9 +50,6 @@ DJANGO_USER_STATMAGIC_PGPASS=gimme_gimme_gallium
 
 # API Token to query CDR
 CDR_API_TOKEN=
-
-# Billmire is looking into how to auto-generate this. Needed for Django stuff...
-SECRET_KEY=
 
 # Location of the locally synced CDR layers used to generate the mapfile
 TILESERVER_LOCAL_SYNC_FOLDER=/usr/local/project/datalayer_download/
