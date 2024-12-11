@@ -44,6 +44,9 @@ EXPOSE 80
 RUN mkdir -p ${BASE_DIR}/${WEBSITE_NAME}
 COPY $WEBSITE_NAME ${BASE_DIR}/${WEBSITE_NAME}
 
+COPY .env /.env
+RUN cat .env >> /etc/environment
+
 RUN mkdir -p /usr/local/pythonenv
 RUN sudo pip3 install virtualenv
 RUN virtualenv /usr/local/pythonenv/mtri-statmagic-web-env
@@ -75,9 +78,7 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
 #    pip install -e .
 
 # Set up CRON job to sync data layers from CDR
-#RUN echo "*/1 * * * * export SECRET_KEY=secret;export CDR_API_TOKEN=${CDR_API_TOKEN};python /usr/local/project/mtri-statmagic-web-dev/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log" > /etc/cron.d/sync_cdr
-#RUN chmod 0644 /etc/cron.d/sync_cdr
 RUN mkdir -p /var/log/statmagic
-RUN echo "*/1 * * * * export SECRET_KEY=secret;export CDR_API_TOKEN=${CDR_API_TOKEN};python /usr/local/project/mtri-statmagic-web/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log" | crontab
+RUN echo "*/1 * * * * export SECRET_KEY=secret;/usr/local/pythonenv/mtri-statmagic-web-env/bin/python /usr/local/project/mtri-statmagic-web/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log 2>&1" | crontab
 
 ENTRYPOINT ["/bin/bash", "/usr/local/project/startup.sh"]

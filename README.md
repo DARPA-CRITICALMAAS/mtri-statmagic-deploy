@@ -56,6 +56,10 @@ TILESERVER_LOCAL_SYNC_FOLDER=/usr/local/project/datalayer_download/
 
 # Identity of the server running the tileserver
 MAPSERVER_SERVER=tileserver
+
+# CDR configuration
+CDR_API=https://api.cdr.land
+CDR_API_VERSION=v1
 ```
 
 ## Build & launch containers:

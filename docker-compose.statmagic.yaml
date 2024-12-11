@@ -43,17 +43,14 @@ services:
     volumes:
       - ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf
       - ./startup.sh:/usr/local/project/startup.sh
-      - ./datalayer_download:/usr/local/project/datalayer_download
+#      - ./datalayer_download:/usr/local/project/datalayer_download
+      - ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER}
       - ./statmagic.map:/usr/local/project/statmagic.map
+#      - ./.env:/.env
     ports:
       - 8000:80
-    environment:
-      CDR_API_TOKEN: $CDR_API_TOKEN
-      DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
-      DB_HOST: $DB_HOST
-      DB_PORT: $DB_PORT
-      MAPSERVER_SERVER: $MAPSERVER_SERVER
-      TILESERVER_LOCAL_SYNC_FOLDER: $TILESERVER_LOCAL_SYNC_FOLDER
+    env_file:
+      - .env
     depends_on:
       postgis:
         condition: service_healthy
@@ -66,15 +63,12 @@ services:
       dockerfile: Dockerfile
     entrypoint: cron -f
     volumes:
-      - ./datalayer_download:/usr/local/project/datalayer_download
+#      - ./datalayer_download:/usr/local/project/datalayer_download
+      - ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER}
       - ./statmagic.map:/usr/local/project/statmagic.map
-    environment:
-      CDR_API_TOKEN: $CDR_API_TOKEN
-      DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
-      DB_HOST: $DB_HOST
-      DB_PORT: $DB_PORT
-      MAPSERVER_SERVER: $MAPSERVER_SERVER
-      TILESERVER_LOCAL_SYNC_FOLDER: $TILESERVER_LOCAL_SYNC_FOLDER
+#      - ./.env:/.env
+    env_file:
+      - .env
 
   tileserver:
     build:

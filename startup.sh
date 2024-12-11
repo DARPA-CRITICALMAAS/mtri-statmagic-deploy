@@ -26,7 +26,16 @@ case $1 in
         echo "export DB_PORT=$DB_PORT" >> /etc/apache2/envvars
         echo "export MAPSERVER_SERVER=$MAPSERVER_SERVER" >> /etc/apache2/envvars
         echo "export TILESERVER_LOCAL_SYNC_FOLDER=$TILESERVER_LOCAL_SYNC_FOLDER" >> /etc/apache2/envvars
+        echo "export CDR_API=$CDR_API" >> /etc/apache2/envvars
+        echo "export CDR_API_VERSION=$CDR_API_VERSION" >> /etc/apache2/envvars
       fi
+
+      # WANT TO GET THIS WORKING! NOT FINDING $DJANGO_USER_STATMAGIC_PGPASS
+      # # Check if required vars exist in /etc/apache2/envvars
+      # if ! grep -q "\.env" /etc/apache2/envvars; then
+      #   echo "export SECRET_KEY='''$secret_key'''" >> /etc/apache2/envvars
+      #   echo ". /.env" >> /etc/apache2/envvars
+      # fi
 
       # Change to $BASE_PATH
       cd $BASE_PATH
