@@ -16,10 +16,6 @@ services:
       - ${PWD}/statmagic_dump.dump.out:/tmp/statmagic_dump.dump.out
       - ${PWD}/init_scripts:/docker-entrypoint-initdb.d/
 
-    # configs:
-    #   - source: init_db
-    #     target: /docker-entrypoint-initdb.d/init.sql
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready", "-d", "statmagic"]
       interval: "3s"
@@ -45,10 +41,8 @@ services:
     volumes:
       - ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf
       - ./startup.sh:/usr/local/project/startup.sh
-#      - ./datalayer_download:/usr/local/project/datalayer_download
       - ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER}
       - ./statmagic.map:/usr/local/project/statmagic.map
-#      - ./.env:/.env
     ports:
       - 8000:80
     env_file:
@@ -58,18 +52,14 @@ services:
         condition: service_healthy
 
   cdr-sync:
-    build:
-      args:
-        DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
-        CDR_API_TOKEN: $CDR_API_TOKEN
-      dockerfile: Dockerfile
+    image: mtri-statmagic-deploy-web-app
+    depends_on:
+      - web-app
     entrypoint: cron -f
     restart: always
     volumes:
-#      - ./datalayer_download:/usr/local/project/datalayer_download
       - ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER}
       - ./statmagic.map:/usr/local/project/statmagic.map
-#      - ./.env:/.env
     env_file:
       - .env
 
@@ -84,13 +74,6 @@ services:
       - ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf
     ports:
       - 8081:80
-
-#    environment:
-#
-
-# configs:
-#   init_db:
-#     file: ./init.sql
 
 volumes:
   postgis_data:
