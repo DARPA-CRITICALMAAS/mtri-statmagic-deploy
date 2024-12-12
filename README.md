@@ -80,6 +80,7 @@ docker load -i image.tar
 ```
 
 Either open 4 terminals (one for each container) or add the `-d` argument to the docker run command to detach (run in the background).
+If you open new terminals, make sure to cd back to `mtri-statmagic-deploy` and source your `.env` file before each `docker run` command.
 The web-app container should be started last.
 
 
@@ -94,11 +95,11 @@ docker network create statmagic-network
 docker run --name postgis --network statmagic-network --rm -u postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=statmagic -e DJANGO_USER_STATMAGIC_PGPASS=$DJANGO_USER_STATMAGIC_PGPASS -v postgis_data:/var/lib/postgresql/data -v ${PWD}/statmagic_dump.dump.out:/tmp/statmagic_dump.dump.out -v ${PWD}/init_scripts:/docker-entrypoint-initdb.d/ --health-cmd CMD-SHELL,pg_isready,-d,statmagic --health-interval 3s --health-retries 30 --health-timeout 3s postgis/postgis:14-3.5
 
 # Launch cdr-sync container
-docker run --name cdr-sync --network statmagic-network --rm --entrypoint /bin/bash -v ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER} -v ./statmagic.map:/usr/local/project/statmagic.map --env-file .env mtri-statmagic-deploy-web-app -c "cron -f"
+docker run --name cdr-sync --network statmagic-network --rm --entrypoint /bin/bash -v ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER} -v ./statmagic.map:/usr/local/project/statmagic.map --env-file .env efvega/mtri-statmagic-deploy-web-app -c "cron -f"
 
 # Launch tileserver container
-docker run --name tileserver --network statmagic-network --rm -v ./datalayer_download:/datalayer_download -v ./statmagic.map:/var/www/mapfiles/statmagic.map -v ./symbols.sym:/var/www/mapfiles/symbols.sym -v ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf -p 8081:80 mtri-statmagic-deploy-tileserver
+docker run --name tileserver --network statmagic-network --rm -v ./datalayer_download:/datalayer_download -v ./statmagic.map:/var/www/mapfiles/statmagic.map -v ./symbols.sym:/var/www/mapfiles/symbols.sym -v ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf -p 8081:80 efvega/mtri-statmagic-deploy-tileserver
 
 # Launch web-app container 
-docker run --name web-abb --network statmagic-network --rm -v ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf -v ./startup.sh:/usr/local/project/startup.sh -v ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER} -v ./statmagic.map:/usr/local/project/statmagic.map -p 8000:80 --env-file .env mtri-statmagic-deploy-web-app server
+docker run --name web-abb --network statmagic-network --rm -v ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf -v ./startup.sh:/usr/local/project/startup.sh -v ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER} -v ./statmagic.map:/usr/local/project/statmagic.map -p 8000:80 --env-file .env efvega/mtri-statmagic-deploy-web-app server
 ```
