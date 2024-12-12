@@ -74,8 +74,14 @@ WEB_APP_HOST_IP:8000/statmagic
 ```
 
 ## Build & launch from images without compose
+To load a container from an archive:
+```bash
+docker load -i image.tar
+```
+
 Either open 4 terminals (one for each container) or add the `-d` argument to the docker run command to detach (run in the background).
 The web-app container should be started last.
+
 
 ```bash
 # Create volume for postgis data storage
