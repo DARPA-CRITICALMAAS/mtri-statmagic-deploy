@@ -5,6 +5,7 @@ services:
 #      - postgis
     image: postgis/postgis:14-3.5
     user: postgres
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -40,6 +41,7 @@ services:
         CDR_API_TOKEN: $CDR_API_TOKEN
       dockerfile: Dockerfile
     command: server
+    restart: always
     volumes:
       - ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf
       - ./startup.sh:/usr/local/project/startup.sh
@@ -62,6 +64,7 @@ services:
         CDR_API_TOKEN: $CDR_API_TOKEN
       dockerfile: Dockerfile
     entrypoint: cron -f
+    restart: always
     volumes:
 #      - ./datalayer_download:/usr/local/project/datalayer_download
       - ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER}
@@ -73,6 +76,7 @@ services:
   tileserver:
     build:
       dockerfile: Dockerfile_tileserver
+    restart: always
     volumes:
       - ./datalayer_download:/datalayer_download
       - ./statmagic.map:/var/www/mapfiles/statmagic.map
