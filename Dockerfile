@@ -38,6 +38,17 @@ RUN apt-get update && apt-get install -y apache2 \
 
 RUN a2enmod cgi headers wsgi
 
+# Set up DOI root certificate
+COPY DOIRootCA2.crt /usr/local/share/ca-certificates
+RUN chmod 644 /usr/local/share/ca-certificates/DOIRootCA2.crt && \
+    update-ca-certificates
+# you probably don't need all of these, but they don't hurt
+ENV PIP_CERT="/etc/ssl/certs/ca-certificates.crt" \
+    SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt" \
+    CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+    REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+    AWS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
+
 # Expose port 80 on the container
 EXPOSE 80
 # Make directory for base_site
@@ -60,22 +71,6 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
     git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
     cd cdr_schemas && \
     pip install -e .
-
-# NOTE: Make sure requirements.txt has no version numbers
-#COPY mtri-statmagic-web/requirements.txt .
-#RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" && \
-#    bash Miniforge3-$(uname)-$(uname -m).sh -b -p /opt/miniforge3 && \
-#    . /opt/miniforge3/bin/activate && \
-#    conda create -n "statmagic-env" python=3.10 && \
-#    conda activate statmagic-env && \
-#    conda install --yes --file requirements.txt && \
-#    pip install --upgrade pip wheel && \
-#    pip install --no-cache-dir -r requirements.txt && \
-#    pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}') && \
-#    cd ../ && \
-#    git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
-#    cd cdr_schemas && \
-#    pip install -e .
 
 # Set up CRON job to sync data layers from CDR
 RUN mkdir -p /var/log/statmagic
