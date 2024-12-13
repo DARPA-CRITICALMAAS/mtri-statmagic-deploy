@@ -68,7 +68,7 @@ services:
       dockerfile: Dockerfile_tileserver
     restart: always
     volumes:
-      - ./datalayer_download:/datalayer_download
+      - ./datalayer_download:/usr/local/project/datalayer_download
       - ./statmagic.map:/var/www/mapfiles/statmagic.map
       - ./symbols.sym:/var/www/mapfiles/symbols.sym
       - ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf

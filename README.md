@@ -98,7 +98,7 @@ docker run --name postgis --network statmagic-network --rm -u postgres -e POSTGR
 docker run --name cdr-sync --network statmagic-network --rm --entrypoint /bin/bash -v ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER} -v ./statmagic.map:/usr/local/project/statmagic.map --env-file .env efvega/mtri-statmagic-deploy-web-app -c "cron -f"
 
 # Launch tileserver container
-docker run --name tileserver --network statmagic-network --rm -v ./datalayer_download:/datalayer_download -v ./statmagic.map:/var/www/mapfiles/statmagic.map -v ./symbols.sym:/var/www/mapfiles/symbols.sym -v ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf -p 8081:80 efvega/mtri-statmagic-deploy-tileserver
+docker run --name tileserver --network statmagic-network --rm -v ./datalayer_download:/usr/local/project/datalayer_download -v ./statmagic.map:/var/www/mapfiles/statmagic.map -v ./symbols.sym:/var/www/mapfiles/symbols.sym -v ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf -p 8081:80 efvega/mtri-statmagic-deploy-tileserver
 
 # Launch web-app container 
 docker run --name web-abb --network statmagic-network --rm -v ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf -v ./startup.sh:/usr/local/project/startup.sh -v ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER} -v ./statmagic.map:/usr/local/project/statmagic.map -p 8000:80 --env-file .env efvega/mtri-statmagic-deploy-web-app server
