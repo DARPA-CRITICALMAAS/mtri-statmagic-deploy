@@ -1,9 +1,9 @@
 
 services:
   postgis:
-#    profiles:
-#      - postgis
+    profiles: [application]
     image: postgis/postgis:14-3.5
+    container_name: statmagic-database
     user: postgres
     restart: always
     environment:
@@ -22,20 +22,15 @@ services:
       timeout: "3s"
       retries: 30
 
-#  postgis-migrate:
-##    profiles:
-##      - postgis
-#    image: migrate/migrate:v4.17.0
-#    depends_on:
-#      postgis:
-#        condition: service_healthy
-
   web-app:
+    profiles: [application]
     build:
       args:
         DJANGO_USER_STATMAGIC_PGPASS: $DJANGO_USER_STATMAGIC_PGPASS
         CDR_API_TOKEN: $CDR_API_TOKEN
-      dockerfile: Dockerfile
+      dockerfile: statmagic.Dockerfile
+    image: efvega/statmagic-web-app
+    container_name: statmagic-web-app
     command: server
     restart: always
     volumes:
@@ -52,7 +47,10 @@ services:
         condition: service_healthy
 
   cdr-sync:
-    image: mtri-statmagic-deploy-web-app
+    profiles: [tile]
+#    image: mtri-statmagic-deploy-web-app
+    image: efvega/statmagic-web-app
+    container_name: statmagic-cdr-sync
     depends_on:
       - web-app
     entrypoint: cron -f
@@ -64,8 +62,11 @@ services:
       - .env
 
   tileserver:
+    profiles: [tile]
     build:
-      dockerfile: Dockerfile_tileserver
+      dockerfile: tileserver.Dockerfile
+    image: efvega/statmagic-tileserver
+    container_name: statmagic-tileserver
     restart: always
     volumes:
       - ./datalayer_download:/usr/local/project/datalayer_download
@@ -74,6 +75,16 @@ services:
       - ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf
     ports:
       - 8081:80
+
+  beak-som:
+    profiles: [beak]
+    build:
+      dockerfile: beak.Dockerfile
+    image: efvega/beak-som
+    container_name: beak-som
+    restart: always
+    env_file:
+      - beak.env
 
 volumes:
   postgis_data:
