@@ -82,7 +82,7 @@ CDR_API_VERSION=v1
 Create a `beak.env` file with the following environment variables:
 ```bash
 # Identity of process interacting with CDR
-SYSTEM_NAME=beak_via_mtri_$(date +%s)
+SYSTEM_NAME=beak_via_mtri_$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)
 
 # CDR configuration
 CDR_API_TOKEN=[CDR_API_TOKEN]
