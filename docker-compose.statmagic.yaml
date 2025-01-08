@@ -48,11 +48,8 @@ services:
 
   cdr-sync:
     profiles: [tile]
-#    image: mtri-statmagic-deploy-web-app
     image: efvega/statmagic-web-app
     container_name: statmagic-cdr-sync
-    depends_on:
-      - web-app
     entrypoint: cron -f
     restart: always
     volumes:
@@ -60,6 +57,12 @@ services:
       - ./statmagic.map:/usr/local/project/statmagic.map
     env_file:
       - .env
+
+#    healthcheck:
+#      test: ["CMD-SHELL", "$(( $(date +%s) - $(date -r /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log +%s) <= 60))"]
+#      interval: "5s"
+#      timeout: "5s"
+#      retries: 12
 
   tileserver:
     profiles: [tile]

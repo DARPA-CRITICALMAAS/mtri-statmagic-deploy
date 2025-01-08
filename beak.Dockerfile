@@ -1,11 +1,16 @@
 # Use an official Miniconda3 image as a parent image
-FROM continuumio/miniconda3:latest
+#FROM continuumio/miniconda3:latest
+FROM condaforge/miniforge3:latest
 
 # Make Docker use bash instead of sh
 SHELL ["/bin/bash", "--login", "-c"]
 
 RUN mkdir -p /usr/local/project/
 WORKDIR /usr/local/project/
+
+# Configuration required for miniforge/licensing stuff
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update && apt-get install -y \
     libgdal-dev \
@@ -18,7 +23,8 @@ RUN git clone https://github.com/DARPA-CRITICALMAAS/beak-ta3.git
 RUN conda update -n base -c defaults conda
 
 # Create a Conda environment with specified name
-RUN conda env create -f beak-ta3/setup/docker/conda/environment.yml
+RUN #conda env create -f beak-ta3/setup/docker/conda/environment.yml
+RUN conda env create -f beak-ta3/setup/unix/environment.yml
 
 # Make RUN commands use the new environment
 SHELL ["conda", "run", "-n", "beak-ta3", "/bin/bash", "-c"]

@@ -26,6 +26,7 @@ git clone https://github.com/DARPA-CRITICALMAAS/mtri-statmagic-deploy.git
 cd mtri-statmagic-web
 git submodule init
 git submodule update
+git pull origin main
 ```
 
 ## If you have not done so, set up AWS CLI
