@@ -55,9 +55,6 @@ EXPOSE 80
 RUN mkdir -p ${BASE_DIR}/${WEBSITE_NAME}
 COPY $WEBSITE_NAME ${BASE_DIR}/${WEBSITE_NAME}
 
-COPY .env /.env
-RUN cat .env >> /etc/environment
-
 RUN mkdir -p /usr/local/pythonenv
 RUN sudo pip3 install virtualenv
 RUN virtualenv /usr/local/pythonenv/mtri-statmagic-web-env
@@ -71,6 +68,9 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
     git clone https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git && \
     cd cdr_schemas && \
     pip install -e .
+
+COPY .env /.env
+RUN cat .env >> /etc/environment
 
 # Set up CRON job to sync data layers from CDR
 RUN mkdir -p /var/log/statmagic

@@ -32,6 +32,7 @@ services:
     image: efvega/statmagic-web-app
     container_name: statmagic-web-app
     command: server
+    hostname: $WEBAPP_HOSTNAME
     restart: always
     volumes:
       - ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf
