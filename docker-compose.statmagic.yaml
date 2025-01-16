@@ -38,7 +38,8 @@ services:
 #      - ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf
 #      - ./startup.sh:/usr/local/project/startup.sh
       - ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER}
-      - ./statmagic.map:/usr/local/project/statmagic.map
+#      - ./statmagic.map:/usr/local/project/statmagic.map
+      - ./statmagic.map:/var/www/mapfiles/statmagic.map
     ports:
       - 8000:80
       - 443:443
