@@ -37,6 +37,7 @@ awscliv2 configure
 
 Set the default region name to `us-east-1`. 
 ## Obtain a copy of our database dump
+**NOTE: This command grabs the database dump as of Dec. 06, 2024. Make sure to grab the latest dump available!**
 ```bash
 awscliv2 s3 cp s3://statmagic/mtri/statmagic_2024-12-06.dump.out statmagic_dump.dump.out
 ```
@@ -79,6 +80,9 @@ MAPSERVER_SERVER=tileserver
 CDR_API_TOKEN=[CDR_API_TOKEN]
 CDR_API=https://api.cdr.land
 CDR_API_VERSION=v1
+
+# Address that the web-application will be accessible at
+WEBAPP_HOSTNAME=[HOSTNAME]
 ```
 Create a `beak.env` file with the following environment variables:
 ```bash
@@ -103,18 +107,23 @@ own token.
 ## Build & launch containers:
 To launch all containers on a single host, run:
 ```bash 
-COMPOSE_PROFILES=* docker compose -f docker-compose.statmagic.yaml up --build
+COMPOSE_PROFILES=* docker compose -f docker-compose.statmagic.yaml up --build -d
 ```
 
 To launch a single profile, run the following command, where `PROFILE_NAME` is one of [`application`, `tile`, `beak`]
 ```bash
-COMPOSE_PROFILES=PROFILE_NAME docker compose -f docker-compose.statmagic.yaml up --build
+COMPOSE_PROFILES=PROFILE_NAME docker compose -f docker-compose.statmagic.yaml up --build -d
+```
+
+Similarly, bring down a single (or multiple) profile with the following command
+```bash
+COMPOSE_PROFILES=* docker compose -f docker-compose.statmagic.yaml down
 ```
 
 ## View web app
-Navigate to 
+Navigate to the following address, where `${WEBAPP_HOSTNAME}` is the env var set in `.env`.
 ```
-WEB_APP_HOST_IP:8000/statmagic
+${WEBAPP_HOSTNAME}/statmagic
 ```
 
 ## Build & launch from images without compose

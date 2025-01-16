@@ -32,25 +32,11 @@ RUN apt-get update && apt-get install -y apache2 \
     curl \
     libgeos-dev \
     cron \
+    mapserver-bin \
     && apt-get clean \
     && apt-get autoremove \
     && rm -rf /var/lib/apt/lists/*
 
-RUN a2enmod cgi headers wsgi
-
-# Set up DOI root certificate
-COPY DOIRootCA2.crt /usr/local/share/ca-certificates
-RUN chmod 644 /usr/local/share/ca-certificates/DOIRootCA2.crt && \
-    update-ca-certificates
-# you probably don't need all of these, but they don't hurt
-ENV PIP_CERT="/etc/ssl/certs/ca-certificates.crt" \
-    SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt" \
-    CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
-    REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
-    AWS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
-
-# Expose port 80 on the container
-EXPOSE 80
 # Make directory for base_site
 RUN mkdir -p ${BASE_DIR}/${WEBSITE_NAME}
 COPY $WEBSITE_NAME ${BASE_DIR}/${WEBSITE_NAME}
@@ -69,11 +55,38 @@ RUN . /usr/local/pythonenv/mtri-statmagic-web-env/bin/activate && \
     cd cdr_schemas && \
     pip install -e .
 
+# Set up DOI root certificate
+COPY DOIRootCA2.crt /usr/local/share/ca-certificates
+RUN chmod 644 /usr/local/share/ca-certificates/DOIRootCA2.crt && \
+    update-ca-certificates
+# you probably don't need all of these, but they don't hurt
+ENV PIP_CERT="/etc/ssl/certs/ca-certificates.crt" \
+    SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt" \
+    CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+    REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+    AWS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
+
+# Copy SSL certs
+COPY statmagic.crt /etc/ssl/certs/statmagic.crt
+COPY statmagic.key /etc/ssl/private/statmagic.key
+
+# Copy apache config and docker entrypoint
+COPY statmagic_000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY startup.sh /usr/local/project/startup.sh
+
+# Enable required apache modules
+RUN a2enmod cgi headers wsgi ssl && \
+    a2ensite 000-default
+
+# Expose port 80 on the container
+#EXPOSE 80
+
+# Environment manipulation required for apache
 COPY .env /.env
 RUN cat .env >> /etc/environment
 
 # Set up CRON job to sync data layers from CDR
 RUN mkdir -p /var/log/statmagic
-RUN echo "*/1 * * * * export SECRET_KEY=secret;/usr/local/pythonenv/mtri-statmagic-web-env/bin/python /usr/local/project/mtri-statmagic-web/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log 2>&1" | crontab
+RUN echo '*/1 * * * * export SECRET_KEY=secret;/usr/local/pythonenv/mtri-statmagic-web-env/bin/python /usr/local/project/mtri-statmagic-web/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron_"$(date +\%s).log" 2>&1' | crontab
 
 ENTRYPOINT ["/bin/bash", "/usr/local/project/startup.sh"]
