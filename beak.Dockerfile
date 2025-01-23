@@ -51,5 +51,16 @@ RUN conda clean --all -y
 RUN pip cache purge
 RUN apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Set up DOI root certificate
+COPY DOIRootCA2.crt /usr/local/share/ca-certificates
+RUN chmod 644 /usr/local/share/ca-certificates/DOIRootCA2.crt && \
+    update-ca-certificates
+# you probably don't need all of these, but they don't hurt
+ENV PIP_CERT="/etc/ssl/certs/ca-certificates.crt" \
+    SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt" \
+    CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+    REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+    AWS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
+
 #ENTRYPOINT ["/opt/conda/envs/beak-ta3/bin/python", "/usr/local/project/mtri-statmagic-web/cdr/subscriber_server.py"]
 ENTRYPOINT ["/opt/conda/envs/beak-ta3/bin/python", "/cdr/subscriber_server.py"]

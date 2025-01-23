@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y apache2 \
     libgdal-dev \
     git \
     curl \
+    wget \
     libgeos-dev \
     cron \
     mapserver-bin \
@@ -85,8 +86,10 @@ RUN a2enmod cgi headers wsgi ssl && \
 COPY .env /.env
 RUN cat .env >> /etc/environment
 
-# Set up CRON job to sync data layers from CDR
+# Set up CRON job to sync data layers from CDR, another job to force recreation of mapfile every 5 minutes
 RUN mkdir -p /var/log/statmagic
-RUN echo '*/1 * * * * export SECRET_KEY=secret;/usr/local/pythonenv/mtri-statmagic-web-env/bin/python /usr/local/project/mtri-statmagic-web/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron_"$(date +\%s).log" 2>&1' | crontab
+RUN echo '*/1 * * * * export SECRET_KEY=secret;/usr/local/pythonenv/mtri-statmagic-web-env/bin/python /usr/local/project/mtri-statmagic-web/data_management_scripts/cron/sync_cdr_output_to_outputlayer_cron.py > /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log 2>&1' > /tmp/crontab.jobs && \
+    echo '*/5 * * * * /usr/local/pythonenv/mtri-statmagic-web-env/bin/python /usr/local/project/mtri-statmagic-web/data_management_scripts/create_mapfile.py > /var/log/statmagic/create_mapfile.log 2&>1' >> /tmp/crontab.jobs && \
+    crontab /tmp/crontab.jobs
 
 ENTRYPOINT ["/bin/bash", "/usr/local/project/startup.sh"]
