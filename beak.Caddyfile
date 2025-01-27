@@ -1,0 +1,6 @@
+https://{$DOMAIN} {
+    tls /etc/ssl/certs/beak.crt /etc/ssl/private/beak.key {
+        ca_root /etc/ssl/certs/ca-certificates.crt
+    }
+    reverse_proxy /hook beak-som:9999
+}

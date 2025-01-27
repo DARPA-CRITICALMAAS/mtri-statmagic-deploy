@@ -1,0 +1,34 @@
+services:
+  caddy:
+    profiles: [beak]
+    image: caddy:2.9.1-alpine
+    restart: unless-stopped
+    container_name: beak-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./statmagic.crt:/etc/ssl/certs/beak.crt
+      - ./statmagic.key:/etc/ssl/private/beak.key
+      - ./DOIRootCA2.crt:/etc/ssl/certs/ca-certificates.crt
+      - ./beak.Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    env_file:
+      - beak.env
+
+  beak-som:
+    profiles: [beak]
+    build:
+      dockerfile: beak.Dockerfile
+    image: efvega/beak-som
+    container_name: beak-som
+    restart: always
+    expose:
+      - "9999"
+    env_file:
+      - beak.env
+
+volumes:
+  caddy_data:
+  caddy_config:

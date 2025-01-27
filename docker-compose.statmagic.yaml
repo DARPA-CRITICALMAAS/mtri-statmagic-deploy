@@ -35,14 +35,11 @@ services:
     hostname: statmagic-web-app
     restart: always
     volumes:
-#      - ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf
-#      - ./startup.sh:/usr/local/project/startup.sh
       - ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER}
-#      - ./statmagic.map:/usr/local/project/statmagic.map
       - ./statmagic.map:/var/www/mapfiles/statmagic.map
     ports:
-      - 8000:80
-      - 443:443
+      - "8000:80"
+      - "443:443"
     env_file:
       - .env
     depends_on:
@@ -61,12 +58,6 @@ services:
     env_file:
       - .env
 
-#    healthcheck:
-#      test: ["CMD-SHELL", "$(( $(date +%s) - $(date -r /var/log/statmagic/sync_cdr_output_to_outputlayer_cron.log +%s) <= 60))"]
-#      interval: "5s"
-#      timeout: "5s"
-#      retries: 12
-
   tileserver:
     profiles: [tile]
     build:
@@ -80,17 +71,19 @@ services:
       - ./symbols.sym:/var/www/mapfiles/symbols.sym
       - ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf
     ports:
-      - 8081:80
+      - "8081:80"
 
-  beak-som:
-    profiles: [beak]
-    build:
-      dockerfile: beak.Dockerfile
-    image: efvega/beak-som
-    container_name: beak-som
-    restart: always
-    env_file:
-      - beak.env
+#  beak-som:
+#    profiles: [beak]
+#    build:
+#      dockerfile: beak.Dockerfile
+#    image: efvega/beak-som
+#    container_name: beak-som
+#    restart: always
+#    ports:
+#      - "9999:9999"
+#    env_file:
+#      - beak.env
 
 volumes:
   postgis_data:

@@ -2,19 +2,23 @@
 This repository contains resources to build and deploy several Docker containers needed for the MTRI Statmagic application
 as well as the beak-ta3 server. The Docker containers are grouped together in profiles allowing the separate deployment
 of containers across multiple hosts, if necessary. A description of the deployed containers can be seen below.
-- `application` profile
-  - `statmagic-web-app` container
-    - Runs the Django web application containing the Statmagic website
-  - `statmagic-database` container
-    - Hosts the postgis database used by the statmagic application
-- `tile` profile
-  - `statmagic-cdr-sync` container
-    - Executes a periodic syncing process to copy relevant CDR layers and re-generate the mapfile used by the tileserver
-  - `statmagic-tileserver` container
-    - Hosts the tileserver used by the statmagic application
-- `beak` profile
-  - `beak-som` container
-    - Hosts the beak-ta3 server
+- `docker-compose.statmagic.yaml`
+  - `application` profile
+    - `statmagic-web-app` container
+      - Runs the Django web application containing the Statmagic website
+    - `statmagic-database` container
+      - Hosts the postgis database used by the statmagic application
+  - `tile` profile
+    - `statmagic-cdr-sync` container
+      - Executes a periodic syncing process to copy relevant CDR layers and re-generate the mapfile used by the tileserver
+    - `statmagic-tileserver` container
+      - Hosts the tileserver used by the statmagic application
+- `docker-compose.beak.yaml`
+  - `beak` profile
+    - `beak-som` container
+      - Hosts the beak-ta3 server
+    - `beak-caddy` container
+      - Hosts web server configuration
 
 
 ## Clone our repositories
@@ -37,30 +41,27 @@ awscliv2 configure
 
 Set the default region name to `us-east-1`. 
 ## Obtain a copy of our database dump
-**NOTE: This command grabs the database dump as of Dec. 06, 2024. Make sure to grab the latest dump available!**
+> NOTE: This command grabs the database dump as of Dec. 06, 2024. Make sure to grab the latest dump available!
 ```bash
 awscliv2 s3 cp s3://statmagic/mtri/statmagic_2024-12-06.dump.out statmagic_dump.dump.out
 ```
 
-Unzip to `statmagic_dump.dump.out`
-
 ## Obtain a copy of our mapfile:
+> This is only necessary if building and testing outside of USGS infrastructure with the public CDR.
 ```bash
 awscliv2 s3 cp s3://statmagic/mtri/statmagic.map mtri-statmagic-deploy/statmagic.map
 ```
-
-## Obtain a copy of our synchronized tile server files:
+If building and deploying on internal USGS resources, just create an empty file to mount into the container:
 ```bash
-# TBD on where this will come from
+touch statmagic.map
 ```
 
 ## Set up environment variables.
 Create a `.env` file with the following environment variables:
 ```bash
 ## Identity of the server running the postgis database.
-# On a single host setup, this will be `postgis` if using Docker Compose or `statmagic-database` if using docker run
-# On a multi host setup, this will be the ip address of the host running the `application` profile
-DB_HOST=postgis
+# On a single host setup, this will be `statmagic-database`
+DB_HOST=statmagic-database
 
 ## Port that the database is exposed on. NOT CURRENTLY USED, 5432 IS DEFAULT
 DB_PORT=5432
@@ -72,45 +73,54 @@ DJANGO_USER_STATMAGIC_PGPASS=gimme_gimme_gallium
 TILESERVER_LOCAL_SYNC_FOLDER=/usr/local/project/datalayer_download/
 
 ## Identity of the server running the tileserver
-# On a single host setup, this will be `tileserver` if using Docker Compose or `statmagic-tileserver` if using docker run
-# On a multi host setup, this will be the ip address of the host running the `tile` profile
-MAPSERVER_SERVER=tileserver
+# This needs to be the IP address or hostname of the server running the statmagic-tileserver container
+# i.e. 127.0.0.1:8081
+MAPSERVER_SERVER=[MAPSERVER_SERVER] 
 
 # CDR configuration
 CDR_API_TOKEN=[CDR_API_TOKEN]
-CDR_API=https://api.cdr.land
-CDR_API_VERSION=v1
+CDR_API=[CDR_API]                   # i.e. https://api.cdr.land
+CDR_API_VERSION=[CDR_API_VERSION]   # i.e. v1
 
 # Address that the web-application will be accessible at
 WEBAPP_HOSTNAME=[HOSTNAME]
 ```
 Create a `beak.env` file with the following environment variables:
 ```bash
-# Identity of process interacting with CDR
-SYSTEM_NAME=beak_via_mtri_$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13; echo)
-
 # CDR configuration
 CDR_API_TOKEN=[CDR_API_TOKEN]
 CDR_HOST=https://api.cdr.land
 CDR_API=$CDR_HOST
 CDR_API=v1
 
+# location of local datalayer cache.
+DATALAYER_CACHE_DIR=/beak_datalayer_cache/
+
+# Hostname of the server running the beak containers i.e. test.beak.usgs
+DOMAIN=[DOMAIN]
+
 # ngrok authentication token
 NGROK_AUTHTOKEN=[NGROK_AUTHTOKEN]
 
-# location of local datalayer cache.
-DATALAYER_CACHE_DIR=/beak_datalayer_cache/
+# URL registered with the CDR for receiving event callbacks
+# Needs to be of the form: https://${DOMAIN}/hook
+LISTENER_CALLBACK_URL=[LISTENER_CALLBACK_URL]
+
+# 
 ```
 Any environment variable set to a string between square brackets, i.e. `[CDR_API_TOKEN]` must be replaced with your
-own token.
+relevant variable.
 
 ## Build & launch containers:
 To launch all containers on a single host, run:
 ```bash 
 COMPOSE_PROFILES=* docker compose -f docker-compose.statmagic.yaml up --build -d
+
+# Or for beak
+COMPOSE_PROFILES=beak docker compose -f docker-compose.beak.yaml up --build -d
 ```
 
-To launch a single profile, run the following command, where `PROFILE_NAME` is one of [`application`, `tile`, `beak`]
+To launch a single profile, run the following command, where `PROFILE_NAME` is one of [`application`, `tile`]
 ```bash
 COMPOSE_PROFILES=PROFILE_NAME docker compose -f docker-compose.statmagic.yaml up --build -d
 ```
@@ -118,6 +128,9 @@ COMPOSE_PROFILES=PROFILE_NAME docker compose -f docker-compose.statmagic.yaml up
 Similarly, bring down a single (or multiple) profile with the following command
 ```bash
 COMPOSE_PROFILES=* docker compose -f docker-compose.statmagic.yaml down
+
+# Or for beak
+COMPOSE_PROFILES=beak docker compose -f docker-compose.beak.yaml down
 ```
 
 ## View web app
@@ -127,6 +140,7 @@ ${WEBAPP_HOSTNAME}/statmagic
 ```
 
 ## Build & launch from images without compose
+> This section is a work in progress
 
 Either open 5 terminals (one for each container) or add the `-d` argument to the docker run command to detach (run in the background).
 If you open new terminals, make sure to cd back to `mtri-statmagic-deploy` and source your `.env` file before each `docker run` command.
@@ -160,7 +174,7 @@ docker run -d --name statmagic-tileserver --network statmagic-network --restart 
 
 # Launch web-app container 
 #docker run --name web-app --network statmagic-network --rm -v ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf -v ./startup.sh:/usr/local/project/startup.sh -v ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER} -v ./statmagic.map:/usr/local/project/statmagic.map -p 8000:80 --env-file .env efvega/mtri-statmagic-deploy-web-app server
-docker run -d --name statmagic-web-app --network statmagic-network --restart always -v ./statmagic_000-default.conf:/etc/apache2/sites-available/000-default.conf -v ./startup.sh:/usr/local/project/startup.sh -v ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER} -v ./statmagic.map:/usr/local/project/statmagic.map -p 8000:80 --env-file .env efvega/statmagic-web-app server
+docker run -d --name statmagic-web-app --network statmagic-network --restart always -v ./datalayer_download:${TILESERVER_LOCAL_SYNC_FOLDER} -v ./statmagic.map:/usr/local/project/statmagic.map -p 8000:80 --env-file .env efvega/statmagic-web-app server
 ```
 If you are running on multiple hosts, run the following instead:
 ```bash
