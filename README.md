@@ -1,7 +1,8 @@
 # mtri-statmagic-deploy
 This repository contains resources to build and deploy several Docker containers needed for the MTRI Statmagic application
-as well as the beak-ta3 server. The Docker containers are grouped together in profiles allowing the separate deployment
-of containers across multiple hosts, if necessary. A description of the deployed containers can be seen below.
+and the beak-ta3 server. There are two Docker Compose files, with containers are grouped together in profiles allowing 
+the separate deployment of containers across multiple hosts, if necessary. A description of the containers can
+be seen below.
 - `docker-compose.statmagic.yaml`
   - `application` profile
     - `statmagic-web-app` container
@@ -19,7 +20,6 @@ of containers across multiple hosts, if necessary. A description of the deployed
       - Hosts the beak-ta3 server
     - `beak-caddy` container
       - Hosts web server configuration
-
 
 ## Clone our repositories
 ```bash
@@ -41,7 +41,7 @@ awscliv2 configure
 
 Set the default region name to `us-east-1`. 
 ## Obtain a copy of our database dump
-> NOTE: This command grabs the database dump as of Dec. 06, 2024. Make sure to grab the latest dump available!
+> This command grabs the database dump as of Dec. 06, 2024. Make sure to grab the latest dump available!
 ```bash
 awscliv2 s3 cp s3://statmagic/mtri/statmagic_2024-12-06.dump.out statmagic_dump.dump.out
 ```
@@ -98,18 +98,25 @@ DATALAYER_CACHE_DIR=/beak_datalayer_cache/
 
 # Hostname of the server running the beak containers i.e. test.beak.usgs
 DOMAIN=[DOMAIN]
-
-# ngrok authentication token
-NGROK_AUTHTOKEN=[NGROK_AUTHTOKEN]
+ 
+# ngrok authentication token 
+# NGROK_AUTHTOKEN=[NGROK_AUTHTOKEN]
 
 # URL registered with the CDR for receiving event callbacks
 # Needs to be of the form: https://${DOMAIN}/hook
 LISTENER_CALLBACK_URL=[LISTENER_CALLBACK_URL]
-
-# 
 ```
-Any environment variable set to a string between square brackets, i.e. `[CDR_API_TOKEN]` must be replaced with your
+> Any environment variable set to a string between square brackets, i.e. `[CDR_API_TOKEN]` must be replaced with your
 relevant variable.
+
+## Additional required resources
+List of required files to build and launch both Statmagic and Beak Docker Compose configurations.
+- Root Certificate Authority file
+  - i.e. `DOIRootCA2.crt`
+- SSL certificate and private key for Statmagic deployment
+  - Must be named `statmagic.crt` and `statmagic.key`
+- SSL certificate and private key for Beak deployment 
+  - Must be named `beak.crt` and `beak.key`
 
 ## Build & launch containers:
 To launch all containers on a single host, run:
