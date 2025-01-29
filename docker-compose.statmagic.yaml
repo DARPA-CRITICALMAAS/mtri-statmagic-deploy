@@ -72,20 +72,6 @@ services:
       - ./statmagic.map:/var/www/mapfiles/statmagic.map
       - ./symbols.sym:/var/www/mapfiles/symbols.sym
       - ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf
-    ports:
-      - "8081:443"
-
-#  beak-som:
-#    profiles: [beak]
-#    build:
-#      dockerfile: beak.Dockerfile
-#    image: efvega/beak-som
-#    container_name: beak-som
-#    restart: always
-#    ports:
-#      - "9999:9999"
-#    env_file:
-#      - beak.env
 
 volumes:
   postgis_data:

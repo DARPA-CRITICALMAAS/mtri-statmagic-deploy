@@ -76,7 +76,7 @@ COPY statmagic_000-default.conf /etc/apache2/sites-available/000-default.conf
 COPY startup.sh /usr/local/project/startup.sh
 
 # Enable required apache modules
-RUN a2enmod cgi headers wsgi ssl && \
+RUN a2enmod cgi headers wsgi ssl proxy proxy_http rewrite && \
     a2ensite 000-default
 
 # Expose port 80 on the container
