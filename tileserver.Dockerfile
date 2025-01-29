@@ -1,5 +1,7 @@
 FROM ubuntu:22.04
 
+ARG WEBAPP_HOSTNAME
+
 RUN apt update && apt install -y \
     apache2 \
     mapserver-bin \
@@ -19,6 +21,8 @@ ENV PIP_CERT="/etc/ssl/certs/ca-certificates.crt" \
 # Copy SSL certs
 COPY statmagic.crt /etc/ssl/certs/statmagic.crt
 COPY statmagic.key /etc/ssl/private/statmagic.key
+
+RUN echo "export WEBAPP_HOSTNAME=$WEBAPP_HOSTNAME" >> /etc/apache2/envvars
 
 RUN a2enmod cgi headers ssl && \
     a2ensite 000-default

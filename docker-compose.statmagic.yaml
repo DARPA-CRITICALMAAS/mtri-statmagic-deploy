@@ -62,6 +62,8 @@ services:
     profiles: [tile]
     build:
       dockerfile: tileserver.Dockerfile
+      args:
+        WEBAPP_HOSTNAME: $WEBAPP_HOSTNAME
     image: efvega/statmagic-tileserver
     container_name: statmagic-tileserver
     restart: always
@@ -71,7 +73,7 @@ services:
       - ./symbols.sym:/var/www/mapfiles/symbols.sym
       - ./tileserver_000-default.conf:/etc/apache2/sites-available/000-default.conf
     ports:
-      - "8081:80"
+      - "8081:443"
 
 #  beak-som:
 #    profiles: [beak]

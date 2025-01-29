@@ -89,9 +89,9 @@ Create a `beak.env` file with the following environment variables:
 ```bash
 # CDR configuration
 CDR_API_TOKEN=[CDR_API_TOKEN]
-CDR_HOST=https://api.cdr.land
-CDR_API=$CDR_HOST
-CDR_API=v1
+CDR_API=[CDR_API]                   # i.e. https://api.cdr.land
+CDR_HOST=[CDR_API]                  # Same as above. Redundant, so should get removed eventually
+CDR_API_VERSION=[CDR_API_VERSION]   # i.e. v1
 
 # location of local datalayer cache.
 DATALAYER_CACHE_DIR=/beak_datalayer_cache/
