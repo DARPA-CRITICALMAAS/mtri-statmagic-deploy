@@ -8,8 +8,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./statmagic.crt:/etc/ssl/certs/beak.crt
-      - ./statmagic.key:/etc/ssl/private/beak.key
+      - ./beak.crt:/etc/ssl/certs/beak.crt
+      - ./beak.key:/etc/ssl/private/beak.key
       - ./DOIRootCA2.crt:/etc/ssl/certs/ca-certificates.crt
       - ./beak.Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
